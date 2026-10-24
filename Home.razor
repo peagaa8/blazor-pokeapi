@@ -1,0 +1,54 @@
+﻿@page "/"
+@using BlazorPokeApi.Models
+@using Microsoft.AspNetCore.Components.Web
+@inject HttpClient Http
+
+<PageTitle>Buscar Pokémon</PageTitle>
+
+<!-- resto do seu código -->
+
+<h1>Buscar Pokémon</h1>
+
+<div>
+    <label>Nome do Pokémon</label>
+    <input @bind="pokemonName" class="form-control" placeholder="pikachu" style="max-width: 300px;" />
+    <button @onclick="BuscarPokemon" class="btn btn-primary mt-2">Buscar Pokémon</button>
+</div>
+
+<hr />
+
+@if (pokemon != null)
+{
+    <h2>Detalhes do Pokémon</h2>
+    <img src="@pokemon.Sprites.Other.OfficialArtwork.FrontDefault" alt="@pokemon.Name" width="150" />
+    <p><strong>ID:</strong> @pokemon.Id</p>
+    <p><strong>Nome:</strong> @pokemon.Name</p>
+    <p><strong>Altura:</strong> @(pokemon.Height / 10.0) m</p>
+    <p><strong>Peso:</strong> @(pokemon.Weight / 10.0) kg</p>
+}
+else if (erro)
+{
+    <p class="text-danger mt-3">Pokémon não encontrado. Tente novamente.</p>
+}
+
+@code {
+    private string pokemonName;
+    private Pokemon pokemon;
+    private bool erro = false;
+
+    private async Task BuscarPokemon()
+    {
+        erro = false;
+        if (string.IsNullOrWhiteSpace(pokemonName)) return;
+
+        try
+        {
+            pokemon = await Http.GetFromJsonAsync<Pokemon>($"https://pokeapi.co/api/v2/pokemon/{pokemonName.ToLower()}");
+        }
+        catch
+        {
+            pokemon = null;
+            erro = true;
+        }
+    }
+}
